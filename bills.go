@@ -25,12 +25,18 @@ func main() {
     fmt.Println("error:", err)
   }
 
-  resp, err := http.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {"username"},"password": {"password"}})
-  if err != nil {
-    // handle error
+  for _, cert := range certs {
+    resp, err := http.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {cert.Username},"password": {cert.Password}})
+    if err != nil {
+      // handle error
+    }
+
+    resp, err := http.Get('https://eservice.towngas.com/en/BillingUsage/NewsNotices')
+    
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    bodyContent := string(body[:])
+    fmt.Printf(bodyContent)
   }
-  defer resp.Body.Close()
-  body, err := ioutil.ReadAll(resp.Body)
-  bodyContent := string(body[:])
-  fmt.Printf(bodyContent)
+
 }
