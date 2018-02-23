@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"strings"
 )
 
 // Certification struct
@@ -41,9 +43,15 @@ func main() {
 
 		var loginCookies = loginResp.Cookies()
 
-		req, err := http.NewRequest("GET", "https://eservice.towngas.com/en/BillingUsage/NewsNotices", nil)
+		// https://eservice.towngas.com/Common/GetMeterReadingHistoryAsync accountNo:7220678095
+		// req, err := http.NewRequest("GET", "https://eservice.towngas.com/en/BillingUsage/NewsNotices", nil)
+		req, err := http.NewRequest("PostForm", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader("accountNo=7220678095"))
 
 		cookieJar.SetCookies(req.URL, loginCookies)
+
+		req.Header.Add("origin", "https://eservice.towngas.com")
+		req.Header.Add("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
+
 		resp, err := client.Do(req)
 
 		if err != nil {
@@ -51,9 +59,9 @@ func main() {
 		}
 		fmt.Println(resp.StatusCode)
 		defer resp.Body.Close()
-		// body, err := ioutil.ReadAll(resp.Body)
-		// bodyContent := string(body[:])
-		// fmt.Printf(bodyContent)
+		body, err := ioutil.ReadAll(resp.Body)
+		bodyContent := string(body[:])
+		fmt.Printf(bodyContent)
 	}
 
 }
