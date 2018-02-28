@@ -31,6 +31,13 @@ func main() {
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: cookieJar,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			fmt.Println(req.URL)
+			for _, r := range via {
+				fmt.Println(r.URL)
+			}
+			return http.ErrUseLastResponse
+		},
 	}
 
 	for _, cert := range certs {
@@ -44,14 +51,17 @@ func main() {
 		var loginCookies = loginResp.Cookies()
 
 		// https://eservice.towngas.com/Common/GetMeterReadingHistoryAsync accountNo:7220678095
-		// req, err := http.NewRequest("GET", "https://eservice.towngas.com/en/BillingUsage/NewsNotices", nil)
-		req, err := http.NewRequest("PostForm", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader("accountNo=7220678095"))
+		req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader("accountNo=7220678095"))
 
 		cookieJar.SetCookies(req.URL, loginCookies)
 
-		req.Header.Add("origin", "https://eservice.towngas.com")
-		req.Header.Add("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
+		req.Header.Set("origin", "https://eservice.towngas.com")
+		req.Header.Set("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
+		req.Header.Set("x-requested-with", "XMLHttpRequest")
+		req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36")
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
+		fmt.Println(req.Header)
 		resp, err := client.Do(req)
 
 		if err != nil {
