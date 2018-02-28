@@ -50,18 +50,36 @@ func main() {
 
 		var loginCookies = loginResp.Cookies()
 
-		// https://eservice.towngas.com/Common/GetMeterReadingHistoryAsync accountNo:7220678095
-		req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader("accountNo=7220678095"))
+		// Get Gosted Tg Account Number
+		getAccNumReq, _ := http.NewRequest("POST", "https://eservice.towngas.com/Common/GetHostedTGAccountAsync", nil)
+		cookieJar.SetCookies(getAccNumReq.URL, loginCookies)
+		getAccNumReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		getAccNumResp, err := client.Do(getAccNumReq)
+
+		if err != nil {
+			// handle error
+		}
+		defer getAccNumResp.Body.Close()
+
+		getAccNumRespBody, _ := ioutil.ReadAll(getAccNumResp.Body)
+		var accountNum []string
+		dec := json.NewDecoder(strings.NewReader(string(getAccNumRespBody[:])))
+		decErr := dec.Decode(&accountNum)
+		if decErr != nil {
+			// handle error
+		}
+
+		var formBody = "accountNo=" + accountNum[0]
+		req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
 
 		cookieJar.SetCookies(req.URL, loginCookies)
 
-		req.Header.Set("origin", "https://eservice.towngas.com")
-		req.Header.Set("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
-		req.Header.Set("x-requested-with", "XMLHttpRequest")
-		req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36")
+		// req.Header.Set("origin", "https://eservice.towngas.com")
+		// req.Header.Set("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
+		// req.Header.Set("x-requested-with", "XMLHttpRequest")
+		// req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36")
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-		fmt.Println(req.Header)
 		resp, err := client.Do(req)
 
 		if err != nil {
