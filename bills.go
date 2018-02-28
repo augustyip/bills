@@ -73,13 +73,7 @@ func main() {
 		req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
 
 		cookieJar.SetCookies(req.URL, loginCookies)
-
-		// req.Header.Set("origin", "https://eservice.towngas.com")
-		// req.Header.Set("referer", "https://eservice.towngas.com/en/BillingUsage/NewsNotices")
-		// req.Header.Set("x-requested-with", "XMLHttpRequest")
-		// req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36")
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
 		resp, err := client.Do(req)
 
 		if err != nil {
