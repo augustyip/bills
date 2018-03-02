@@ -79,11 +79,9 @@ func main() {
 		if err != nil {
 			// handle error
 		}
-		fmt.Println(resp.StatusCode)
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		bodyContent := string(body[:])
 		fmt.Printf(bodyContent)
 	}
-
 }
