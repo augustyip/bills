@@ -18,7 +18,7 @@ type Certification struct {
 	Password string
 }
 
-func main() {
+func towngas() (r string) {
 
 	file, _ := os.Open("cert.json")
 	decoder := json.NewDecoder(file)
@@ -39,6 +39,8 @@ func main() {
 			return http.ErrUseLastResponse
 		},
 	}
+
+	var result string
 
 	for _, cert := range certs {
 
@@ -81,7 +83,7 @@ func main() {
 		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-		bodyContent := string(body[:])
-		fmt.Printf(bodyContent)
+		result = string(body[:])
 	}
+	return result
 }
