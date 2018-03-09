@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/augustyip/bills/services"
 )
 
 func main() {
-	r := towngas()
+	r := services.GetNewsNoticeAsync()
 	fmt.Printf(r)
 }

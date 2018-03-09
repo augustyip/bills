@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"encoding/json"
@@ -18,7 +18,8 @@ type Certification struct {
 	Password string
 }
 
-func towngas() (r string) {
+// GetNewsNoticeAsync get latest info
+func GetNewsNoticeAsync() (r string) {
 
 	file, _ := os.Open("cert.json")
 	decoder := json.NewDecoder(file)
