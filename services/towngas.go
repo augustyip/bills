@@ -31,8 +31,6 @@ func GetNewsNoticeAsync(c Towngas) (r string) {
 		},
 	}
 
-	var result string
-
 	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
 	if err != nil {
 		// handle error
@@ -72,7 +70,5 @@ func GetNewsNoticeAsync(c Towngas) (r string) {
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	result = string(body[:])
-
-	return result
+	return string(body[:])
 }
