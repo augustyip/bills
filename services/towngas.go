@@ -7,27 +7,17 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"os"
 	"strings"
 )
 
-// Certification struct
-type Certification struct {
-	Service  string
+// Towngas towngas sercice account details
+type Towngas struct {
 	Username string
 	Password string
 }
 
 // GetNewsNoticeAsync get latest info
-func GetNewsNoticeAsync() (r string) {
-
-	file, _ := os.Open("cert.json")
-	decoder := json.NewDecoder(file)
-	certs := make([]Certification, 0)
-	err := decoder.Decode(&certs)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
+func GetNewsNoticeAsync(c Towngas) (r string) {
 
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -43,48 +33,46 @@ func GetNewsNoticeAsync() (r string) {
 
 	var result string
 
-	for _, cert := range certs {
-
-		loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {cert.Username}, "password": {cert.Password}})
-		if err != nil {
-			// handle error
-		}
-		defer loginResp.Body.Close()
-
-		var loginCookies = loginResp.Cookies()
-
-		// Get Gosted Tg Account Number
-		getAccNumReq, _ := http.NewRequest("POST", "https://eservice.towngas.com/Common/GetHostedTGAccountAsync", nil)
-		cookieJar.SetCookies(getAccNumReq.URL, loginCookies)
-		getAccNumReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		getAccNumResp, err := client.Do(getAccNumReq)
-
-		if err != nil {
-			// handle error
-		}
-		defer getAccNumResp.Body.Close()
-
-		getAccNumRespBody, _ := ioutil.ReadAll(getAccNumResp.Body)
-		var accountNum []string
-		dec := json.NewDecoder(strings.NewReader(string(getAccNumRespBody[:])))
-		decErr := dec.Decode(&accountNum)
-		if decErr != nil {
-			// handle error
-		}
-
-		var formBody = "accountNo=" + accountNum[0]
-		req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
-
-		cookieJar.SetCookies(req.URL, loginCookies)
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		resp, err := client.Do(req)
-
-		if err != nil {
-			// handle error
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		result = string(body[:])
+	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
+	if err != nil {
+		// handle error
 	}
+	defer loginResp.Body.Close()
+
+	var loginCookies = loginResp.Cookies()
+
+	// Get Gosted Tg Account Number
+	getAccNumReq, _ := http.NewRequest("POST", "https://eservice.towngas.com/Common/GetHostedTGAccountAsync", nil)
+	cookieJar.SetCookies(getAccNumReq.URL, loginCookies)
+	getAccNumReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	getAccNumResp, err := client.Do(getAccNumReq)
+
+	if err != nil {
+		// handle error
+	}
+	defer getAccNumResp.Body.Close()
+
+	getAccNumRespBody, _ := ioutil.ReadAll(getAccNumResp.Body)
+	var accountNum []string
+	dec := json.NewDecoder(strings.NewReader(string(getAccNumRespBody[:])))
+	decErr := dec.Decode(&accountNum)
+	if decErr != nil {
+		// handle error
+	}
+
+	var formBody = "accountNo=" + accountNum[0]
+	req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
+
+	cookieJar.SetCookies(req.URL, loginCookies)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+
+	if err != nil {
+		// handle error
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	result = string(body[:])
+
 	return result
 }
