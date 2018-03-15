@@ -31,6 +31,11 @@ func main() {
 			towngas := services.Towngas{cert.Username, cert.Password}
 			r := services.GetNewsNoticeAsync(towngas)
 			fmt.Printf(r)
+
+		case "clp":
+			clp := services.Clp{cert.Username, cert.Password}
+			r := services.GetServiceDashboard(clp)
+			fmt.Printf(r)
 		}
 	}
 }
