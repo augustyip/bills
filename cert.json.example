@@ -3,5 +3,10 @@
     "Service" :"towngas", 
     "Username": "xxxxxxx",
     "Password": "xxxxxxxxx"
+  },
+  {
+    "Service" :"clp", 
+    "Username": "xxxxxxx",
+    "Password": "xxxxxxxxx"
   }
 ]
