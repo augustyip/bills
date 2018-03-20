@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-// Towngas towngas sercice account details
+// Towngas towngas.com account details
 type Towngas struct {
 	Username string
 	Password string

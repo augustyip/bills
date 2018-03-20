@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Clp towngas sercice account details
+// Clp clp.com.hk account details
 type Clp struct {
 	Username string
 	Password string
