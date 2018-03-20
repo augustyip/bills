@@ -8,5 +8,10 @@
     "Service" :"clp", 
     "Username": "xxxxxxx",
     "Password": "xxxxxxxxx"
+  },
+  {
+    "Service" :"wsd", 
+    "Username": "xxxxxxx",
+    "Password": "xxxxxxxxx"
   }
 ]
