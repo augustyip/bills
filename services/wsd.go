@@ -2,12 +2,9 @@ package services
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
-
-	"golang.org/x/net/html"
 )
 
 // Wsd www.esd.wsd.gov.hk account details
@@ -31,23 +28,21 @@ func ElectronicBill(c Wsd) string {
 		},
 	}
 
-	var loginPageUrl = "https://www.esd.wsd.gov.hk/esd/login.do"
+	var loginPageURL = "https://www.esd.wsd.gov.hk/esd/login.do"
 
-	loginPageResp, err := http.Get(loginPageUrl)
+	loginPageResp, err := http.Get(loginPageURL)
 	if err != nil {
 		// handle error
 	}
 	defer loginPageResp.Body.Close()
-	loginPageBody, err := ioutil.ReadAll(loginPageResp.Body)
+	// loginPageBody, err := ioutil.ReadAll(loginPageResp.Body)
 
-	loginPageDoc, err := html.Parse(strings.NewReader(string(loginPageBody[:])))
-	if err != nil {
-	}
-
-	// login url https://www.esd.wsd.gov.hk/esd/login.do
+	// loginPageDoc, err := html.Parse(strings.NewReader(string(loginPageBody[:])))
+	// if err != nil {
+	// }
 
 	var loginBody = "userID=" + c.Username + "&password=" + c.Password
-	loginReq, err := http.NewRequest("POST", loginPageUrl, strings.NewReader(loginBody))
+	loginReq, err := http.NewRequest("POST", loginPageURL, strings.NewReader(loginBody))
 	if err != nil {
 		// handle error
 	}
