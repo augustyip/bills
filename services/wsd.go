@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
 // Wsd www.esd.wsd.gov.hk account details
@@ -15,8 +17,8 @@ type Wsd struct {
 }
 
 // ElectronicBill get latest info
-func ElectronicBill(c Clp) string {
-	var csrfToken string
+func ElectronicBill(c Wsd) string {
+
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: cookieJar,
@@ -29,37 +31,35 @@ func ElectronicBill(c Clp) string {
 		},
 	}
 
+	var loginPageUrl = "https://www.esd.wsd.gov.hk/esd/login.do"
+
+	loginPageResp, err := http.Get(loginPageUrl)
+	if err != nil {
+		// handle error
+	}
+	defer loginPageResp.Body.Close()
+	loginPageBody, err := ioutil.ReadAll(loginPageResp.Body)
+
+	loginPageDoc, err := html.Parse(strings.NewReader(string(loginPageBody[:])))
+	if err != nil {
+	}
+
 	// login url https://www.esd.wsd.gov.hk/esd/login.do
 
-	var loginBody = "username=" + c.Username + "&password=" + c.Password
-	loginReq, err := http.NewRequest("POST", "https://services.clp.com.hk/Service/ServiceLogin.ashx", strings.NewReader(loginBody))
+	var loginBody = "userID=" + c.Username + "&password=" + c.Password
+	loginReq, err := http.NewRequest("POST", loginPageUrl, strings.NewReader(loginBody))
 	if err != nil {
 		// handle error
 	}
 
-	loginReq.Header.Set("X-CSRFToken", csrfToken)
-	loginReq.Header.Set("X-Requested-With", "XMLHttpRequest")
-	loginReq.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	// loginReq.Header.Set("X-CSRFToken", csrfToken)
+	// loginReq.Header.Set("X-Requested-With", "XMLHttpRequest")
+	loginReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	loginResp, err := client.Do(loginReq)
-	if err != nil {
-		// handle error
-	}
-	defer loginResp.Body.Close()
+	fmt.Println(loginResp.StatusCode)
 
-	var loginedCookies = loginResp.Cookies()
-
-	req, err := http.NewRequest("POST", "https://services.clp.com.hk/Service/ServiceDashboard.ashx", strings.NewReader("assCA="))
-
-	cookieJar.SetCookies(req.URL, loginedCookies)
-	req.Header.Set("X-CSRFToken", csrfToken)
-	req.Header.Set("X-Requested-With", "XMLHttpRequest")
-	resp, err := client.Do(req)
-
-	if err != nil {
-		// handle error
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	return string(body[:])
+	return "xxx"
+	// body, err := ioutil.ReadAll(loginResp.Body)
+	// return string(body[:])
 }

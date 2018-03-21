@@ -27,14 +27,19 @@ func main() {
 	for _, cert := range certs {
 
 		switch s := cert.Service; s {
-		case "towngas":
-			towngas := services.Towngas{cert.Username, cert.Password}
-			r := services.GetNewsNoticeAsync(towngas)
-			fmt.Printf(r)
+		// case "towngas":
+		// 	towngas := services.Towngas{cert.Username, cert.Password}
+		// 	r := services.GetNewsNoticeAsync(towngas)
+		// 	fmt.Printf(r)
 
-		case "clp":
-			clp := services.Clp{cert.Username, cert.Password}
-			r := services.GetServiceDashboard(clp)
+		// case "clp":
+		// 	clp := services.Clp{cert.Username, cert.Password}
+		// 	r := services.GetServiceDashboard(clp)
+		// 	fmt.Printf(r)
+
+		case "wsd":
+			wsd := services.Wsd{cert.Username, cert.Password}
+			r := services.ElectronicBill(wsd)
 			fmt.Printf(r)
 		}
 	}
