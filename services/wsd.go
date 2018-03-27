@@ -2,9 +2,12 @@ package services
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // Wsd www.esd.wsd.gov.hk account details
@@ -27,25 +30,32 @@ func ElectronicBill(c Wsd) string {
 			return http.ErrUseLastResponse
 		},
 	}
+	var token string
 
-	var loginPageURL = "https://www.esd.wsd.gov.hk/esd/login.do"
-
-	loginPageResp, err := http.Get(loginPageURL)
+	// Get prelogin page for token
+	preLoginPageResp, err := http.Get("https://www.esd.wsd.gov.hk/esd/preLogin.do?pageFlag=1")
 	if err != nil {
 		// handle error
 	}
-	defer loginPageResp.Body.Close()
-	// loginPageBody, err := ioutil.ReadAll(loginPageResp.Body)
-
-	// loginPageDoc, err := html.Parse(strings.NewReader(string(loginPageBody[:])))
-	// if err != nil {
-	// }
-
-	var loginBody = "userID=" + c.Username + "&password=" + c.Password
-	loginReq, err := http.NewRequest("POST", loginPageURL, strings.NewReader(loginBody))
+	defer preLoginPageResp.Body.Close()
+	preLoginPageDoc, err := goquery.NewDocumentFromReader(preLoginPageResp.Body)
 	if err != nil {
 		// handle error
 	}
+	// For token hidden field and get toekn value
+	preLoginPageDoc.Find("input[name='org.apache.struts.taglib.html.TOKEN']").Each(func(i int, s *goquery.Selection) {
+		token, _ = s.Attr("value")
+	})
+
+	var cookies = preLoginPageResp.Cookies()
+
+	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + c.Username + "&password=" + c.Password + "&submit=%E9%81%9E%E4%BA%A4"
+	fmt.Println(loginBody)
+	loginReq, err := http.NewRequest("POST", "https://www.esd.wsd.gov.hk/esd/login.do", strings.NewReader(loginBody))
+	if err != nil {
+		// handle error
+	}
+	cookieJar.SetCookies(loginReq.URL, cookies)
 
 	// loginReq.Header.Set("X-CSRFToken", csrfToken)
 	// loginReq.Header.Set("X-Requested-With", "XMLHttpRequest")
@@ -54,7 +64,7 @@ func ElectronicBill(c Wsd) string {
 	loginResp, err := client.Do(loginReq)
 	fmt.Println(loginResp.StatusCode)
 
-	return "xxx"
-	// body, err := ioutil.ReadAll(loginResp.Body)
-	// return string(body[:])
+	// return "xxx"
+	body, err := ioutil.ReadAll(loginResp.Body)
+	return string(body[:])
 }
