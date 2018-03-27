@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,8 +15,14 @@ type Clp struct {
 	Password string
 }
 
+// Bill bill details
+type Bill struct {
+	AccountNo string `json:"caNo"`
+	Balance   string `json:"LastBillAmount"`
+}
+
 // GetServiceDashboard get latest info
-func GetServiceDashboard(c Clp) string {
+func (b *Bill) GetServiceDashboard(c Clp) {
 	var csrfToken string
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -69,6 +76,6 @@ func GetServiceDashboard(c Clp) string {
 		// handle error
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	return string(body[:])
+	data, err := ioutil.ReadAll(resp.Body)
+	json.Unmarshal(data, &b)
 }
