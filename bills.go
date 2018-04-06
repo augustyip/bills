@@ -45,10 +45,10 @@ func main() {
 			clpBill.GetServiceDashboard(clp)
 			fmt.Printf("%+v\n", clpBill)
 
-			// case "wsd":
-			// 	wsd := services.Wsd{cert.Username, cert.Password}
-			// 	r := services.ElectronicBill(wsd)
-			// 	fmt.Printf(r)
+		case "wsd":
+			wsd := services.Wsd{cert.Username, cert.Password}
+			r := services.ElectronicBill(wsd)
+			fmt.Printf(r)
 		}
 	}
 }
