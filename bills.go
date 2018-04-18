@@ -23,6 +23,10 @@ type Bill struct {
 	LastPaymentDate string
 }
 
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
+
 func main() {
 
 	file, _ := os.Open("cert.json")
