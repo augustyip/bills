@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/augustyip/bills/services"
+	log "github.com/sirupsen/logrus"
 )
 
 // Certification struct
@@ -35,20 +36,24 @@ func main() {
 
 		switch s := cert.Service; s {
 		case "towngas":
+			log.Info("Starting to run towngas service...")
 			towngas := services.Towngas{cert.Username, cert.Password}
 			r := services.GetNewsNoticeAsync(towngas)
-			fmt.Printf(r)
+			// fmt.Printf(r)
+			log.Info(r)
 
 		case "clp":
 			clp := services.Clp{cert.Username, cert.Password}
 			var clpBill services.Bill
 			clpBill.GetServiceDashboard(clp)
-			fmt.Printf("%+v\n", clpBill)
+			log.Info(clpBill)
 
 		case "wsd":
 			wsd := services.Wsd{cert.Username, cert.Password}
 			r := services.ElectronicBill(wsd)
-			fmt.Printf(r)
+			// fmt.Printf(r)
+			log.Info(r)
+
 		}
 	}
 }
