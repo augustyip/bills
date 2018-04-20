@@ -17,7 +17,7 @@ type Towngas struct {
 }
 
 // GetNewsNoticeAsync get latest info
-func GetNewsNoticeAsync(c Towngas) string {
+func GetNewsNoticeAsync(c Towngas, channel chan string) {
 
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -70,5 +70,5 @@ func GetNewsNoticeAsync(c Towngas) string {
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	return string(body[:])
+	channel <- string(body[:])
 }
