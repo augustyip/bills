@@ -37,28 +37,26 @@ func main() {
 		fmt.Println("error:", err)
 	}
 
-	c := make(chan string, 10)
+	c := make(chan string, len(certs))
 
 	for _, cert := range certs {
 
 		switch s := cert.Service; s {
 		case "towngas":
-			log.Info("Starting to run towngas service...")
+			log.Info("Starting to run Towngas service...")
 			towngas := services.Towngas{cert.Username, cert.Password}
 			go services.GetNewsNoticeAsync(towngas, c)
 			// fmt.Printf(r)
 
 		case "clp":
+			log.Info("Starting to run CLP service...")
 			clp := services.Clp{cert.Username, cert.Password}
-			var clpBill services.Bill
-			clpBill.GetServiceDashboard(clp)
-			log.Info(clpBill)
+			go services.GetServiceDashboard(clp, c)
 
 		case "wsd":
+			log.Info("Starting to run WSD service...")
 			wsd := services.Wsd{cert.Username, cert.Password}
-			r := services.ElectronicBill(wsd)
-			// fmt.Printf(r)
-			log.Info(r)
+			go services.ElectronicBill(wsd, c)
 
 		}
 	}

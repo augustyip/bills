@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	log "github.com/sirupsen/logrus"
 )
 
 // Wsd www.esd.wsd.gov.hk account details
@@ -16,7 +17,7 @@ type Wsd struct {
 }
 
 // ElectronicBill get latest info
-func ElectronicBill(c Wsd) string {
+func ElectronicBill(c Wsd, channel chan string) {
 
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -31,6 +32,7 @@ func ElectronicBill(c Wsd) string {
 	}
 	var token string
 
+	log.Info("[WSD] Get login page for the token.")
 	// Get prelogin page for token
 	preLoginPageResp, err := http.Get("https://www.esd.wsd.gov.hk/esd/preLogin.do?pageFlag=1")
 	if err != nil {
@@ -43,6 +45,7 @@ func ElectronicBill(c Wsd) string {
 		token, _ = s.Attr("value")
 	})
 
+	log.Info("[WSD] Logging into...")
 	// Login action
 	var preLoginCookies = preLoginPageResp.Cookies()
 	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + c.Username + "&password=" + c.Password + "&submit=%E9%81%9E%E4%BA%A4"
@@ -56,6 +59,7 @@ func ElectronicBill(c Wsd) string {
 	if err != nil {
 		// handle error
 	}
+	log.Info("[WSD] Logged in, redirect to electronicBill page.")
 
 	// Get electronicBill page
 	var cookies = loginResp.Cookies()
@@ -104,5 +108,5 @@ func ElectronicBill(c Wsd) string {
 	processSelectBillServicesDoc.Find("table.style_table").Each(func(i int, s *goquery.Selection) {
 		billTable, _ = s.Html()
 	})
-	return billTable
+	channel <- billTable
 }

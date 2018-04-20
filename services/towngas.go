@@ -8,6 +8,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Towngas towngas.com account details
@@ -30,16 +32,20 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 			return http.ErrUseLastResponse
 		},
 	}
+	log.Info("[Towngas] Logging into...")
 
 	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
 	if err != nil {
-		// handle error
+		log.Error(err)
+		close(channel)
+		exit()
 	}
 	defer loginResp.Body.Close()
 
 	var loginCookies = loginResp.Cookies()
 
-	// Get Gosted Tg Account Number
+	log.Info("[Towngas] Getting Hosted TG Account Number...")
+	// Get Hosted Tg Account Number
 	getAccNumReq, _ := http.NewRequest("POST", "https://eservice.towngas.com/Common/GetHostedTGAccountAsync", nil)
 	cookieJar.SetCookies(getAccNumReq.URL, loginCookies)
 	getAccNumReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -58,6 +64,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 		// handle error
 	}
 
+	log.Info("[Towngas] Getting News Notice...")
 	var formBody = "accountNo=" + accountNum[0]
 	req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
 
