@@ -31,7 +31,7 @@ type WsdBill struct {
 
 // ElectronicBill get latest info
 func ElectronicBill(c Wsd, channel chan string) {
-
+	log.Debug("[WSD] Starting to run WSD service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: cookieJar,
@@ -49,7 +49,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	// Get prelogin page for token
 	preLoginPageResp, err := http.Get("https://www.esd.wsd.gov.hk/esd/preLogin.do?pageFlag=1")
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer preLoginPageResp.Body.Close()
 	preLoginPageDoc, _ := goquery.NewDocumentFromReader(preLoginPageResp.Body)
@@ -64,13 +64,13 @@ func ElectronicBill(c Wsd, channel chan string) {
 	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + c.Username + "&password=" + c.Password + "&submit=%E9%81%9E%E4%BA%A4"
 	loginReq, err := http.NewRequest("POST", "https://www.esd.wsd.gov.hk/esd/login.do", strings.NewReader(loginBody))
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	cookieJar.SetCookies(loginReq.URL, preLoginCookies)
 	loginReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	loginResp, err := client.Do(loginReq)
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	log.Debug("[WSD] Logged in, redirect to electronicBill page.")
 
@@ -80,7 +80,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	cookieJar.SetCookies(electronicBillInitReq.URL, cookies)
 	electronicBillInitResp, err := client.Do(electronicBillInitReq)
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer electronicBillInitResp.Body.Close()
 
@@ -103,7 +103,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	processSelectAccountReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	processSelectAccountResp, err := client.Do(processSelectAccountReq)
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer processSelectAccountResp.Body.Close()
 
@@ -116,7 +116,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	processSelectBillServicesReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	processSelectBillServicesResp, err := client.Do(processSelectBillServicesReq)
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer processSelectBillServicesResp.Body.Close()
 	// var billTable string

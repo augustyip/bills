@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Clp clp.com.hk account details
@@ -16,6 +18,8 @@ type Clp struct {
 
 // GetServiceDashboard get latest info
 func GetServiceDashboard(c Clp, channel chan string) {
+	log.Debug("[CLP] Starting to run CLP service...")
+
 	var csrfToken string
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -29,9 +33,10 @@ func GetServiceDashboard(c Clp, channel chan string) {
 		},
 	}
 
+	log.Debug("[CLP] Get login page for the CSRF token.")
 	cookiesResp, err := client.Get("https://services.clp.com.hk/zh/login/index.aspx")
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer cookiesResp.Body.Close()
 	for _, cookie := range cookiesResp.Cookies() {
@@ -40,10 +45,11 @@ func GetServiceDashboard(c Clp, channel chan string) {
 		}
 	}
 
+	log.Debug("[CLP] Logging into...")
 	var loginBody = "username=" + c.Username + "&password=" + c.Password
 	loginReq, err := http.NewRequest("POST", "https://services.clp.com.hk/Service/ServiceLogin.ashx", strings.NewReader(loginBody))
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 
 	loginReq.Header.Set("X-CSRFToken", csrfToken)
@@ -52,12 +58,13 @@ func GetServiceDashboard(c Clp, channel chan string) {
 
 	loginResp, err := client.Do(loginReq)
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer loginResp.Body.Close()
 
 	var loginedCookies = loginResp.Cookies()
 
+	log.Debug("[CLP] Getting service dashboard info...")
 	req, err := http.NewRequest("POST", "https://services.clp.com.hk/Service/ServiceDashboard.ashx", strings.NewReader("assCA="))
 
 	cookieJar.SetCookies(req.URL, loginedCookies)
@@ -66,7 +73,7 @@ func GetServiceDashboard(c Clp, channel chan string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)

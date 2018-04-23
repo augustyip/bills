@@ -20,7 +20,7 @@ type Towngas struct {
 
 // GetNewsNoticeAsync get latest info
 func GetNewsNoticeAsync(c Towngas, channel chan string) {
-
+	log.Debug("[Towngas] Starting to run Towngas service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Jar: cookieJar,
@@ -34,7 +34,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 	}
 
 	// TODO: try to login down login failed error, such as username or passwrod wrong
-	log.Info("[Towngas] Logging into...")
+	log.Debug("[Towngas] Logging into...")
 	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
 	if err != nil {
 		log.Error(err)
@@ -43,7 +43,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 
 	var loginCookies = loginResp.Cookies()
 
-	log.Info("[Towngas] Getting Hosted TG Account Number...")
+	log.Debug("[Towngas] Getting Hosted TG Account Number...")
 	// Get Hosted Tg Account Number
 	getAccNumReq, _ := http.NewRequest("POST", "https://eservice.towngas.com/Common/GetHostedTGAccountAsync", nil)
 	cookieJar.SetCookies(getAccNumReq.URL, loginCookies)
@@ -51,7 +51,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 	getAccNumResp, err := client.Do(getAccNumReq)
 
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer getAccNumResp.Body.Close()
 
@@ -60,10 +60,10 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 	dec := json.NewDecoder(strings.NewReader(string(getAccNumRespBody[:])))
 	decErr := dec.Decode(&accountNum)
 	if decErr != nil {
-		// handle error
+		log.Error(decErr)
 	}
 
-	log.Info("[Towngas] Getting News Notice...")
+	log.Debug("[Towngas] Getting News Notice...")
 	var formBody = "accountNo=" + accountNum[0]
 	req, err := http.NewRequest("POST", "https://eservice.towngas.com/NewsNotices/GetNewsNoticeAsync", strings.NewReader(formBody))
 
@@ -72,7 +72,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		// handle error
+		log.Error(err)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
