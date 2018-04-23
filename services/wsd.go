@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
@@ -14,6 +15,18 @@ import (
 type Wsd struct {
 	Username string
 	Password string
+}
+
+// WsdBillSummary Bill Summary of wsd
+type WsdBillSummary struct {
+	Bill []WsdBill
+}
+
+// WsdBill Bill Summary of wsd
+type WsdBill struct {
+	BillIssueDate  string
+	TotalAmount    string
+	PaymentDueDate string
 }
 
 // ElectronicBill get latest info
@@ -32,7 +45,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	}
 	var token string
 
-	log.Info("[WSD] Get login page for the token.")
+	log.Debug("[WSD] Get login page for the token.")
 	// Get prelogin page for token
 	preLoginPageResp, err := http.Get("https://www.esd.wsd.gov.hk/esd/preLogin.do?pageFlag=1")
 	if err != nil {
@@ -45,7 +58,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 		token, _ = s.Attr("value")
 	})
 
-	log.Info("[WSD] Logging into...")
+	log.Debug("[WSD] Logging into...")
 	// Login action
 	var preLoginCookies = preLoginPageResp.Cookies()
 	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + c.Username + "&password=" + c.Password + "&submit=%E9%81%9E%E4%BA%A4"
@@ -59,7 +72,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	if err != nil {
 		// handle error
 	}
-	log.Info("[WSD] Logged in, redirect to electronicBill page.")
+	log.Debug("[WSD] Logged in, redirect to electronicBill page.")
 
 	// Get electronicBill page
 	var cookies = loginResp.Cookies()
@@ -80,6 +93,8 @@ func ElectronicBill(c Wsd, channel chan string) {
 		accountID, _ = s.Attr("value")
 	})
 
+	log.Debug("[WSD] Submitting to processSelectAccount.do page..")
+
 	// Submit to processSelectAccount.do page
 	var selectAccount = "org.apache.struts.taglib.html.TOKEN=" + token + "&accountID=" + accountID + "&page=2&submit=Next"
 	processSelectAccountReq, err := http.NewRequest("POST", "https://www.esd.wsd.gov.hk/esd/bnc/electronicBill/processSelectAccount.do", strings.NewReader(selectAccount))
@@ -92,6 +107,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	}
 	defer processSelectAccountResp.Body.Close()
 
+	log.Debug("[WSD] Submitting to processSelectBillServices.do page..")
 	// Submit to processSelectBillServices.do page
 	var selectBillServices = "org.apache.struts.taglib.html.TOKEN=" + token + "&services=summary&submit=Next"
 	processSelectBillServicesReq, err := http.NewRequest("POST", "https://www.esd.wsd.gov.hk/esd/bnc/electronicBill/processSelectBillServices.do", strings.NewReader(selectBillServices))
@@ -103,10 +119,23 @@ func ElectronicBill(c Wsd, channel chan string) {
 		// handle error
 	}
 	defer processSelectBillServicesResp.Body.Close()
-	var billTable string
+	// var billTable string
 	processSelectBillServicesDoc, _ := goquery.NewDocumentFromReader(processSelectBillServicesResp.Body)
-	processSelectBillServicesDoc.Find("table.style_table").Each(func(i int, s *goquery.Selection) {
-		billTable, _ = s.Html()
+	var bills []WsdBill
+	processSelectBillServicesDoc.Find("table.style_table tr").Each(func(i int, s *goquery.Selection) {
+		bill := WsdBill{
+			BillIssueDate:  s.Find("td").First().Text(),
+			TotalAmount:    s.Find("td").Eq(1).Text(),
+			PaymentDueDate: s.Find("td").Eq(2).Text(),
+		}
+
+		// billJSON, _ := json.Marshal(bill)
+		bills = append(bills, bill)
 	})
-	channel <- billTable
+
+	billSummary := &WsdBillSummary{
+		Bill: bills,
+	}
+	result, err := json.Marshal(billSummary)
+	channel <- string(result[:])
 }

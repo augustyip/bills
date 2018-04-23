@@ -32,13 +32,12 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 			return http.ErrUseLastResponse
 		},
 	}
-	log.Info("[Towngas] Logging into...")
 
+	// TODO: try to login down login failed error, such as username or passwrod wrong
+	log.Info("[Towngas] Logging into...")
 	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
 	if err != nil {
 		log.Error(err)
-		close(channel)
-		exit()
 	}
 	defer loginResp.Body.Close()
 

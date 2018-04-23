@@ -46,7 +46,6 @@ func main() {
 			log.Info("Starting to run Towngas service...")
 			towngas := services.Towngas{cert.Username, cert.Password}
 			go services.GetNewsNoticeAsync(towngas, c)
-			// fmt.Printf(r)
 
 		case "clp":
 			log.Info("Starting to run CLP service...")
@@ -58,6 +57,9 @@ func main() {
 			wsd := services.Wsd{cert.Username, cert.Password}
 			go services.ElectronicBill(wsd, c)
 
+		}
+		if len(c) == len(certs) {
+			close(c)
 		}
 	}
 	for i := range c {
