@@ -9,8 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Certification struct
-type Certification struct {
+type account struct {
 	Service  string
 	Username string
 	Password string
@@ -29,32 +28,32 @@ func init() {
 
 func main() {
 
-	file, _ := os.Open("cert.json")
+	file, _ := os.Open("accounts.json")
 	decoder := json.NewDecoder(file)
-	certs := make([]Certification, 0)
-	err := decoder.Decode(&certs)
+	accounts := make([]account, 0)
+	err := decoder.Decode(&accounts)
 	if err != nil {
 		fmt.Println("error:", err)
 	}
 
 	c := make(chan string, 3)
 
-	for _, cert := range certs {
+	for _, acc := range accounts {
 
-		switch s := cert.Service; s {
+		switch s := acc.Service; s {
 		case "towngas":
 			log.Info("Starting to run Towngas service...")
-			towngas := services.Towngas{cert.Username, cert.Password}
+			towngas := services.Towngas{acc.Username, acc.Password}
 			go services.GetNewsNoticeAsync(towngas, c)
 
 		case "clp":
 			log.Info("Starting to run CLP service...")
-			clp := services.Clp{cert.Username, cert.Password}
+			clp := services.Clp{acc.Username, acc.Password}
 			go services.GetServiceDashboard(clp, c)
 
 		case "wsd":
 			log.Info("Starting to run WSD service...")
-			wsd := services.Wsd{cert.Username, cert.Password}
+			wsd := services.Wsd{acc.Username, acc.Password}
 			go services.ElectronicBill(wsd, c)
 
 		}

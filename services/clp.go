@@ -17,7 +17,7 @@ type Clp struct {
 }
 
 // GetServiceDashboard get latest info
-func GetServiceDashboard(c Clp, channel chan string) {
+func GetServiceDashboard(acc Clp, channel chan string) {
 	log.Debug("[CLP] Starting to run CLP service...")
 
 	var csrfToken string
@@ -46,7 +46,7 @@ func GetServiceDashboard(c Clp, channel chan string) {
 	}
 
 	log.Debug("[CLP] Logging into...")
-	var loginBody = "username=" + c.Username + "&password=" + c.Password
+	var loginBody = "username=" + acc.Username + "&password=" + acc.Password
 	loginReq, err := http.NewRequest("POST", "https://services.clp.com.hk/Service/ServiceLogin.ashx", strings.NewReader(loginBody))
 	if err != nil {
 		log.Error(err)

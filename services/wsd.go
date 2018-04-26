@@ -30,7 +30,7 @@ type WsdBill struct {
 }
 
 // ElectronicBill get latest info
-func ElectronicBill(c Wsd, channel chan string) {
+func ElectronicBill(acc Wsd, channel chan string) {
 	log.Debug("[WSD] Starting to run WSD service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -61,7 +61,7 @@ func ElectronicBill(c Wsd, channel chan string) {
 	log.Debug("[WSD] Logging into...")
 	// Login action
 	var preLoginCookies = preLoginPageResp.Cookies()
-	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + c.Username + "&password=" + c.Password + "&submit=%E9%81%9E%E4%BA%A4"
+	var loginBody = "org.apache.struts.taglib.html.TOKEN=" + token + "&userID=" + acc.Username + "&password=" + acc.Password + "&submit=%E9%81%9E%E4%BA%A4"
 	loginReq, err := http.NewRequest("POST", "https://www.esd.wsd.gov.hk/esd/login.do", strings.NewReader(loginBody))
 	if err != nil {
 		log.Error(err)

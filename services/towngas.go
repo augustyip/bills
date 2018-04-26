@@ -19,7 +19,7 @@ type Towngas struct {
 }
 
 // GetNewsNoticeAsync get latest info
-func GetNewsNoticeAsync(c Towngas, channel chan string) {
+func GetNewsNoticeAsync(acc Towngas, channel chan string) {
 	log.Debug("[Towngas] Starting to run Towngas service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
@@ -35,7 +35,7 @@ func GetNewsNoticeAsync(c Towngas, channel chan string) {
 
 	// TODO: try to login down login failed error, such as username or passwrod wrong
 	log.Debug("[Towngas] Logging into...")
-	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {c.Username}, "password": {c.Password}})
+	loginResp, err := client.PostForm("https://eservice.towngas.com/EAccount/Login/SignIn", url.Values{"LoginID": {acc.Username}, "password": {acc.Password}})
 	if err != nil {
 		log.Error(err)
 	}
