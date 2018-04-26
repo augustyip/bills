@@ -42,19 +42,25 @@ func main() {
 
 		switch s := acc.Service; s {
 		case "towngas":
-			log.Info("Starting to run Towngas service...")
-			towngas := services.Towngas{acc.Username, acc.Password}
-			go services.GetNewsNoticeAsync(towngas, c)
+			towngasAcc := services.Towngas{
+				Username: acc.Username,
+				Password: acc.Password,
+			}
+			go services.GetNewsNoticeAsync(towngasAcc, c)
 
 		case "clp":
-			log.Info("Starting to run CLP service...")
-			clp := services.Clp{acc.Username, acc.Password}
-			go services.GetServiceDashboard(clp, c)
+			clpAcc := services.Clp{
+				Username: acc.Username,
+				Password: acc.Password,
+			}
+			go services.GetServiceDashboard(clpAcc, c)
 
 		case "wsd":
-			log.Info("Starting to run WSD service...")
-			wsd := services.Wsd{acc.Username, acc.Password}
-			go services.ElectronicBill(wsd, c)
+			wsdAcc := services.Wsd{
+				Username: acc.Username,
+				Password: acc.Password,
+			}
+			go services.ElectronicBill(wsdAcc, c)
 
 		}
 	}
