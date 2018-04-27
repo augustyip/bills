@@ -7,17 +7,13 @@ import (
 	"net/http/cookiejar"
 	"strings"
 
+	"github.com/augustyip/bills/model"
+
 	log "github.com/sirupsen/logrus"
 )
 
-// Clp clp.com.hk account details
-type Clp struct {
-	Username string
-	Password string
-}
-
 // GetServiceDashboard get latest info
-func GetServiceDashboard(acc Clp, channel chan string) {
+func GetServiceDashboard(acc model.Account, channel chan string) {
 	log.Debug("[CLP] Starting to run CLP service...")
 
 	var csrfToken string

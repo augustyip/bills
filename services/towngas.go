@@ -9,17 +9,13 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/augustyip/bills/model"
+
 	log "github.com/sirupsen/logrus"
 )
 
-// Towngas towngas.com account details
-type Towngas struct {
-	Username string
-	Password string
-}
-
 // GetNewsNoticeAsync get latest info
-func GetNewsNoticeAsync(acc Towngas, channel chan string) {
+func GetNewsNoticeAsync(acc model.Account, channel chan string) {
 	log.Debug("[Towngas] Starting to run Towngas service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{

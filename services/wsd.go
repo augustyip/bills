@@ -7,15 +7,11 @@ import (
 	"net/http/cookiejar"
 	"strings"
 
+	"github.com/augustyip/bills/model"
+
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/sirupsen/logrus"
 )
-
-// Wsd www.esd.wsd.gov.hk account details
-type Wsd struct {
-	Username string
-	Password string
-}
 
 // WsdBillSummary Bill Summary of wsd
 type WsdBillSummary struct {
@@ -30,7 +26,7 @@ type WsdBill struct {
 }
 
 // ElectronicBill get latest info
-func ElectronicBill(acc Wsd, channel chan string) {
+func ElectronicBill(acc model.Account, channel chan string) {
 	log.Debug("[WSD] Starting to run WSD service...")
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{
