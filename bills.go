@@ -37,8 +37,10 @@ func main() {
 	for _, acc := range accounts {
 		services.GetSummy(acc, c)
 	}
-	for i := range c {
-		log.Info(i)
+
+	for j := 1; j <= len(accounts); j++ {
+		result, _ := <-c
+		log.Info(result)
 	}
 
 }
