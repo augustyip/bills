@@ -119,14 +119,16 @@ func ElectronicBill(acc model.Account, channel chan string) {
 	processSelectBillServicesDoc, _ := goquery.NewDocumentFromReader(processSelectBillServicesResp.Body)
 	var bills []WsdBill
 	processSelectBillServicesDoc.Find("table.style_table tr").Each(func(i int, s *goquery.Selection) {
-		bill := WsdBill{
-			BillIssueDate:  s.Find("td").First().Text(),
-			TotalAmount:    s.Find("td").Eq(1).Text(),
-			PaymentDueDate: s.Find("td").Eq(2).Text(),
-		}
+		if len(s.Find("td").First().Text()) != 0 {
+			bill := WsdBill{
+				BillIssueDate:  s.Find("td").First().Text(),
+				TotalAmount:    s.Find("td").Eq(1).Text(),
+				PaymentDueDate: s.Find("td").Eq(2).Text(),
+			}
 
-		// billJSON, _ := json.Marshal(bill)
-		bills = append(bills, bill)
+			// billJSON, _ := json.Marshal(bill)
+			bills = append(bills, bill)
+		}
 	})
 
 	billSummary := &WsdBillSummary{
